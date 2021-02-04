@@ -43,6 +43,10 @@ echo "<h2>Page dédiée à la modification de mesures d'un équipement</h2>";
 
 
 if(isset($_POST['change_param_eqpt'])){
+
+    $_POST['batiment_eqpt'] = htmlspecialchars($_POST['batiment_eqpt']);
+    $_POST['local_eqpt'] = htmlspecialchars($_POST['local_eqpt']);
+
     $requete = $db->prepare('UPDATE EQPT SET BATIMENT = ? , LOCAL = ? , TYPE = ? WHERE ID = ?');
     $requete->execute(array($_POST['batiment_eqpt'],$_POST['local_eqpt'],$_POST['type_eqpt'],$_POST['IMMO']));
     $requete->closeCursor();
@@ -52,6 +56,9 @@ if(isset($_POST['change_param_eqpt'])){
 
     if(isset($_POST['new_eqpt'])){  // Lors de la création :
 
+        $_POST['batiment_eqpt'] = htmlspecialchars($_POST['batiment_eqpt']);
+        $_POST['local_eqpt'] = htmlspecialchars($_POST['local_eqpt']);
+        
         $requete = $db->prepare('INSERT INTO EQPT(ID,BATIMENT,LOCAL,TYPE) VALUES(?,?,?,?)');
         // try{
         $requete->execute(array($_POST['IMMO'],$_POST['batiment_eqpt'],$_POST['local_eqpt'],$_POST['type_eqpt']));

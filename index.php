@@ -43,12 +43,23 @@ include("header.php");
 
 // Récupération de tous les modèles de rondes
 $reponse = $db->query('SELECT ID, NOM FROM MODELE_RONDE');
-while($data = $reponse->fetch()){
-    $modeles_rondes[$data['ID']] = $data['NOM'];
+while($mydata = $reponse->fetch()){
+    $modeles_rondes[$mydata['ID']] = $mydata['NOM'];
 }
 $reponse->closeCursor();
 
+// Récupération de tous les équipements
+$reponse = $db->query('SELECT * FROM EQPT');
+
+while($data = $reponse->fetch()){
+$liste_eqpt[$data['ID']]["type"] = $data['TYPE']; 
+$liste_eqpt[$data['ID']]["local"] = $data['LOCAL'];
+$liste_eqpt_[$data['ID']]["batiment"] = $data['BATIMENT'];
+$liste_eqpt_full[$data['ID']] =  $data['ID']." : ".$data['TYPE']." : ".$data['BATIMENT']." : ".$data['LOCAL'];
+}
 ?>
+
+<!-- Contenu Application -->
 
 <div class="main">
 
@@ -66,6 +77,7 @@ $reponse->closeCursor();
         $requete = $db->prepare('SELECT * FROM EQPT WHERE ID = ?');
         $requete->execute(array($_POST['IMMO_modif']));
         $data = $requete->fetch();
+        $_SESSION['ID'] = $data['ID'];
         $requete->closeCursor();
         echo "<h2>Vous pouvez modifier l'équipement N°".$data['ID']." de type \"".$data['TYPE']."\"<br/></h2>"; 
         ?>
@@ -79,8 +91,19 @@ $reponse->closeCursor();
             echo "<br/><p>L'équipement N°".$_POST['IMMO_modif']." n'existe pas</p>";
         }
     } 
-    ?>
 
+    // Suppression de l'équipement
+
+    if(isset($_POST['supprimer'])){
+        $reponse = $db->prepare('DELETE FROM EQPT WHERE ID = ?');
+        $reponse->execute(array($_SESSION['ID']));
+        $reponse->closeCursor();
+        
+        $_SESSION['ID'] = null;
+        echo "<meta http-equiv='refresh' content='0'>"; 
+    }
+
+    ?>
     <form method="post" action="equipement.php">
     <p>Type équipement :<select name="type_eqpt">
     <option value="sel">Adoucisseur sel</option>
@@ -118,18 +141,29 @@ $reponse->closeCursor();
     -->
 
 
-    <h3>Pour modifier (ou supprimer) un équipement, veuillez saisir son numéro IMMO :</h3>
+    <h3>Pour modifier (ou supprimer) un équipement, veuillez le sélectionner :</h3>
 
     <form method="post">
-        <input type="number" name="IMMO_modif" placeholder="110757..." />
+        
+    <select name="IMMO_modif">
+    <option> &nbsp;  - &nbsp; &nbsp; - &nbsp; &nbsp; - &nbsp; &nbsp; -  &nbsp; &nbsp; - &nbsp; &nbsp; - &nbsp; &nbsp; - </option>
+    <?php   foreach($liste_eqpt_full as $key => $value){
+    echo "<option value=\"".$key."\">$value</option>"; } ?>
+    </select>
+        <!-- <input type="number" name="IMMO_modif" placeholder="110757..." /> -->
         <input type="submit" name="modif_eqpt" value="Modifier mon équipement" />
     </form>
 
 
-    <h3>Pour ajouter (ou supprimer) des mesures à un équipement, veuillez saisir son numéro IMMO :</h3>
+    <h3>Pour ajouter (ou supprimer) des mesures à un équipement, veuillez le sélectionner :</h3>
 
     <form method="post" action="equipement.php">
-        <input type="number" name="IMMO" placeholder="110757..." />
+        <select name="IMMO">
+        <option> &nbsp;  - &nbsp; &nbsp; - &nbsp; &nbsp; - &nbsp; &nbsp; -  &nbsp; &nbsp; - &nbsp; &nbsp; - &nbsp; &nbsp; - </option>
+        <?php   foreach($liste_eqpt_full as $key => $value){
+        echo "<option value=\"".$key."\">$value</option>"; } ?>
+        </select>
+        <!-- <input type="number" name="IMMO" placeholder="110757..." /> -->
         <input type="submit" name="modif_eqpt" value="Modifier les mesures de mon équipement" />
     </form>
 
@@ -142,28 +176,40 @@ $reponse->closeCursor();
 
 
     <h2>Vous pouvez créer ou modifier un modèle de rondes</h2>
-    <form method="post" action="ronde.php">
-        <p>Je crée un modèle de rondes s'appelant ...<input type="texte" name="nom_modele_rondes" placeholder="Rondes B8 Adou..." />
+    <form method="post" action="modele_ronde.php">
+        <p>Je crée un modèle de rondes s'appelant ...<input type="texte" name="nom_modele_rondes" placeholder="Rondes 8B Adou..." />
         <input type="submit" name="new_modele_rondes" value="Créer un modèle de rondes" />
     </form>
-    <form method="post" action="ronde.php">
+    <form method="post" action="modele_ronde.php">
     <p>J'ouvre le modèle de rondes suivant...<select name="modele_rondes">
         <?php 
         foreach($modeles_rondes as $key => $value){
             // On enregistre le numéro de la ronde en option, et affiche son nom
             echo "<option value=\"".$key."\">".$value."</option>";
         } ?>
-    </select></p>
+    </select>
     <input type="submit" value="Ouvrir le modèle de rondes"/>
-    </form>
+    </p></form>
 
-</div>
+
+</div> <br/>
+
+
 
 <h4>Vous pouvez réaliser une ronde</h4>
 
 <p>Choisissez le modèle de rondes que vous souhaitez effectuer...</p>
 
-
+<form method="post" action="ronde.php">
+    <p><select name="mon_modele_ronde">
+        <?php 
+        foreach($modeles_rondes as $key => $value){
+            // On enregistre le numéro de la ronde en option, et affiche son nom
+            echo "<option value=\"".$key."\">".$value."</option>";
+        } ?>
+    </select>
+    <input type="submit" name="go_ronde" value="Réaliser une ronde sur ce modèle"/>
+    </p></form>
 
 
 </body>

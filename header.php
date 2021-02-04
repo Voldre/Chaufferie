@@ -29,26 +29,24 @@
     <form action="index.php"> <p>
 
 <?php if(basename($_SERVER['PHP_SELF']) != "index.php"){ ?>
-<input type="submit" value ="Retourner à l'accueil" > 
+    <input type="submit" value ="Retourner à l'accueil" > 
 
-    <?php
-        if(isset($_SESSION['OT_ID'])){
-            echo "OT N°".$_SESSION['OT_ID'];
+        <?php
+
+            if(basename($_SERVER['PHP_SELF']) == "test.php"){
+                if(!isset($_SESSION['message'])){
+                    $_SESSION['message'] = array();
+                }
+                $_SESSION['message'][] = ("<label>Page ".substr(basename($_SERVER['PHP_SELF']),-5,-4)."/4</label>"); // Reset pour les futures notifications 
+
+                echo "<h5 class=\"float\">";
+                foreach($_SESSION['message'] as $value){
+                    echo $value; // Pour afficher les "notifications"
+                }
+                echo "</h5>";
+
+                $_SESSION['message'] = array();
+            }
         }
-        
-        if(!isset($_SESSION['message'])){
-            $_SESSION['message'] = array();
-        }
-        $_SESSION['message'][] = ("<label>Page ".substr(basename($_SERVER['PHP_SELF']),-5,-4)."/4</label>"); // Reset pour les futures notifications 
-
-        echo "<h5 class=\"float\">";
-        foreach($_SESSION['message'] as $value){
-            echo $value; // Pour afficher les "notifications"
-        }
-        echo "</h5>";
-
-        $_SESSION['message'] = array();
-    }
-
         ?>
     </p></form>
